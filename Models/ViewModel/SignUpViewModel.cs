@@ -12,6 +12,7 @@ namespace Models.ViewModel
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
+        public string UserName { get; set; }
         public string Password { get; set; }
         public string ConfirmPassword { get; set; }
         public string PhoneNumber { get; set; }
@@ -30,7 +31,7 @@ namespace Models.ViewModel
                 res.FirstName = item.FirstName;
                 res.LastName = item.LastName;
                 res.Email = item.Email;
-                res.Email = item.UserName;
+                res.UserName = item.UserName;
                 res.Password = item.PasswordHash;
                 res.PhoneNumber = item.PhoneNumber;
                 res.isActive = item.isActive;
@@ -45,7 +46,7 @@ namespace Models.ViewModel
             res.FirstName = data.FirstName;
             res.LastName = data.LastName;
             res.Email = data.Email;
-            res.Email = data.UserName;
+            res.UserName = data.UserName;
             res.Password = data.PasswordHash;
             res.PhoneNumber = data.PhoneNumber;
             res.isActive = data.isActive;
@@ -58,7 +59,7 @@ namespace Models.ViewModel
             res.FirstName = data.FirstName;
             res.LastName = data.LastName;
             res.Email = data.Email;
-            res.UserName = data.Email;
+            res.UserName = data.UserName;
             res.PasswordHash = data.Password;
             res.PhoneNumber = data.PhoneNumber;
             res.isActive = data.isActive;

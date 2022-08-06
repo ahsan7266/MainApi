@@ -38,7 +38,7 @@ namespace Services.Services.Seed
                         EmailType=Enums.EmailType.ForgetPassword.ToString(),
                         Body="<h3>Follow the instructions to reset your password</h3>" +
                             "<br><p><b>To reset your password</b></p>",
-                        Link=$"{Constrant.AppUrl}/ResetPassword",
+                        Link=$"{Constrant.ApiUrl}/ResetPassword",
                     },
                     new EmailTemplate()
                     {
@@ -95,7 +95,7 @@ namespace Services.Services.Seed
                 {
                     new ApplicationUser { FirstName = "Admin", LastName = "Admin", Email = "admin@gmail.com", UserName = "admin", PasswordHash = "Admin.123", PhoneNumber = "03189159007", isActive = true },
                     new ApplicationUser { FirstName = "Hammas", LastName = "Khan", Email = "hammaskhan01@gmail.com", UserName = "hammaskhan01", PasswordHash = "Hemi.4364", PhoneNumber = "03470713121", isActive = true },
-                    new ApplicationUser { FirstName = "Ahsan", LastName = "Mehmood", Email = "ahsanmehmood1@gmail.com", UserName = "ahsanmehmood1", PasswordHash = "Ahsan.123", PhoneNumber = "0305012121", isActive = true }
+                    new ApplicationUser { FirstName = "Ahsan", LastName = "Mehmood", Email = "ahsanmehmood454@gmail.com", UserName = "ahsanmehmood", PasswordHash = "Ahsan.4413", PhoneNumber = "03068564413", isActive = true }
                 };
                 foreach (var user in applicationUsers)
                 {
@@ -122,9 +122,8 @@ namespace Services.Services.Seed
                 //Assign Roles
                 var adminEmail = await userManager.FindByEmailAsync("admin@gmail.com");
                 var hammasEmail = await userManager.FindByEmailAsync("hammaskhan01@gmail.com");
-                var ahsanEmail = await userManager.FindByEmailAsync("ahsanmehmood1@gmail.com");
+                var ahsanEmail = await userManager.FindByEmailAsync("ahsanmehmood454@gmail.com");
                 var adminRole = await roleManager.FindByNameAsync("Admin");
-                var userRole = await roleManager.FindByNameAsync("User");
                 if (adminRole != null)
                 {
                     if (adminEmail != null)
@@ -151,24 +150,7 @@ namespace Services.Services.Seed
                         }
                     }
                 }
-                if (userRole != null)
-                {
-                    if (hammasEmail != null)
-                    {
-                        if (!(await userManager.IsInRoleAsync(hammasEmail, userRole.Name)))
-                        {
-                            await userManager.AddToRoleAsync(hammasEmail, userRole.ToString());
-                        }
-                    }
-
-                    if (ahsanEmail != null)
-                    {
-                        if (!(await userManager.IsInRoleAsync(ahsanEmail, userRole.Name)))
-                        {
-                            await userManager.AddToRoleAsync(ahsanEmail, userRole.ToString());
-                        }
-                    }
-                }
+                
 
                 await context.SaveChangesAsync();
                 return new Response<string>

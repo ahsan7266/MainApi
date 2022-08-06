@@ -15,8 +15,7 @@ namespace Data.DataConfig
         public static int MailPort = 587;
         public static string MailFrom = "hammaskhan01@gmail.com";
         public static string MailPassword = "laayuhzozamtendr";
-        public static string ApiUrl = "https://localhost:5158";
-        public static string AppUrl = "https://localhost:5158";
+        public static string ApiUrl = "https://localhost:7083";
     }
 
 }

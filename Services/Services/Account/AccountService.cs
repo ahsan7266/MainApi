@@ -116,7 +116,7 @@ namespace Services.Services.Account
             }
         }
 
-        public async Task<Response<LoginViewModel>> LoginAync(LoginViewModel login)
+        public async Task<Response<string>> LoginAync(LoginViewModel login)
         {
             try
             {
@@ -124,37 +124,47 @@ namespace Services.Services.Account
                 {
                     throw new NullReferenceException("Something is Worng in Model!");
                 }
-
                 //Email Existing Checking
                 var user = await userManager.FindByEmailAsync(login.Email);
+                
                 if (user is null)
                 {
-                    return new Response<LoginViewModel>
-                    {
-                        Message = "Email Dose Not Exists",
-                        Status = false
-                    };
-                }
+                    //User Existing Checking
+                    user = await userManager.FindByNameAsync(login.Email);
 
+                    if (user is null)
+                    {
+                        return new Response<string>
+                        {
+                            Message = "Data Does Not Exists",
+                            Status = false
+                        };
+                    }
+                }
+                var Role = await userManager.GetRolesAsync(user);
+                var rolename = Role[0];
                 //Email and Password Checking
                 var pass = await userManager.CheckPasswordAsync(user, login.Password);
                 if (!pass)
                 {
-                    return new Response<LoginViewModel>
+                    return new Response<string>
                     {
                         Message = "Wrong Password",
                         Status = false,
                     };
                 }
-
-                var result = await userManager.CheckPasswordAsync(user, login.Password);
-                if (result)
+                else
                 {
+                    
+
                     //Generate Token & Token Working
                     var claims = new[]
                     {
                         new Claim("Email",user.Email),
-                        new Claim(ClaimTypes.NameIdentifier, user.Email)
+                        new Claim("FirstName",user.FirstName),
+                        new Claim("LastName",user.LastName),
+                        new Claim("UserId", user.Id.ToString()),
+                        new Claim("UserRole", rolename),
                     };
 
                     var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Constrant.Authenticatekey));
@@ -165,8 +175,8 @@ namespace Services.Services.Account
                         claims: claims,
                         signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
                         );
-                    var stringtoken = new JwtSecurityTokenHandler().WriteToken(token);
 
+                    var stringtoken = new JwtSecurityTokenHandler().WriteToken(token);
                     //Session Log working
                     SessionLog sessionLog = new SessionLog();
                     sessionLog.UserId = user.Id;
@@ -174,14 +184,16 @@ namespace Services.Services.Account
                     await context.SessionLog.AddAsync(sessionLog);
                     await context.SaveChangesAsync();
 
-                    return new Response<LoginViewModel>
+
+                    return new Response<string>
                     {
-                        Message = stringtoken,
+                        Message = "Login Successfully...!",
                         Status = true,
-                        Expiredate = token.ValidTo
+                        Expiredate = token.ValidTo,
+                        Data = stringtoken
                     };
                 }
-                return new Response<LoginViewModel>
+                return new Response<string>
                 {
                     Message = "Login Password is Worng...!",
                     Status = false

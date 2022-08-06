@@ -13,7 +13,7 @@ namespace Services.Services.Account
     {
         Task<Response<SignUpViewModel>> GetUserAsync();
         Task<Response<SignUpViewModel>> SignupAsync(SignUpViewModel register);
-        Task<Response<LoginViewModel>> LoginAync(LoginViewModel login);
+        Task<Response<string>> LoginAync(LoginViewModel login);
         Task<Response<string>> ConfirmEmailAsync(string userId, string token);
         Task<Response<string>> ForgetPasswordAsync(string email);
         Task<Response<ResetPasswordViewModel>> ResetPasswordAsync(ResetPasswordViewModel model);
