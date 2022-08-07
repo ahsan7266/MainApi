@@ -154,6 +154,23 @@ namespace Data.Migrations.PortfolioMigrations
 
                     b.ToTable("Skills");
                 });
+
+            modelBuilder.Entity("Models.Model.PortfolioModel.Tool", b =>
+                {
+                    b.Property<Guid>("ToolId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PeronalinfoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ToolId");
+
+                    b.ToTable("Tools");
+                });
 #pragma warning restore 612, 618
         }
     }

@@ -89,6 +89,19 @@ namespace Data.Migrations.PortfolioMigrations
                 {
                     table.PrimaryKey("PK_Skills", x => x.SkillId);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "Tools",
+                columns: table => new
+                {
+                    ToolId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PeronalinfoId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tools", x => x.ToolId);
+                });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -107,6 +120,9 @@ namespace Data.Migrations.PortfolioMigrations
 
             migrationBuilder.DropTable(
                 name: "Skills");
+
+            migrationBuilder.DropTable(
+                name: "Tools");
         }
     }
 }

@@ -366,6 +366,7 @@ namespace Services.Services.Portfolio
                 PI.Profileimg = profilefilePath;
                 PI.Cv = cvPath;
                 PI.FirstName = model.FirstName;
+                PI.LastName = model.LastName;
                 PI.Email = model.Email;
                 PI.PhoneNumber = model.PhoneNumber;
                 PI.Country = model.Country;
@@ -384,7 +385,7 @@ namespace Services.Services.Portfolio
                     Data = ID.ToString()
                 };
             }
-        }       
+        }
         public async Task<Response<SkillViewModel>> AddorUpdateSkillAsync(SkillViewModel model)
         {
             try
@@ -988,30 +989,86 @@ namespace Services.Services.Portfolio
                         Message = "Model is Empty",
                         Status = false
                     };
-                var result = await context.Skills.FirstOrDefaultAsync(x => x.PeronalinfoId == model.Skills.PeronalinfoId);
-                if (result is not null)
+                bool update = false;
+                bool add = false;
+                foreach (var skills in model.Skills)
                 {
-                    var data = await context.Skills.FindAsync(model.Skills.PeronalinfoId);
-                    data.Name = model.Skills.Name;
-                    data.PeronalinfoId = model.Skills.PeronalinfoId;
-                    this.context.Update(data);
-                    await context.SaveChangesAsync();
-                    return new Response<OtherViewModel>
+                    var result = await context.Skills.FirstOrDefaultAsync(x => x.SkillId == skills.SkillId);
+                    if (result is not null)
                     {
-                        Message = "Data Updated Successfully",
-                        Status = true
-                    };
+                        var data = await context.Skills.FindAsync(skills.SkillId);
+                        data.Name = skills.Name;
+                        data.Percentage = skills.Percentage;
+                        data.PeronalinfoId = skills.PeronalinfoId;
+                        this.context.Update(data);
+                        update = true;
+                    }
+                    else
+                    {
+                        await this.context.Skills.AddAsync(skills.SkillMapper());
+                        add = true;
+                    }
+                }
+                await context.SaveChangesAsync();
+
+                foreach (var services in model.Services)
+                {
+                    var result = await context.Services.FirstOrDefaultAsync(x => x.ServiceId == services.ServiceId);
+                    if (result is not null)
+                    {
+                        var data = await context.Services.FindAsync(services.ServiceId);
+                        data.Name = services.Name;
+                        data.PeronalinfoId = services.PeronalinfoId;
+                        this.context.Update(data);
+                        update = true;
+                    }
+                    else
+                    {
+                        await this.context.Services.AddAsync(services.ServiceMapper());
+                        add = true;
+                    }
+                }
+                await context.SaveChangesAsync();
+
+                foreach (var tools in model.Tools)
+                {
+                    var result = await context.Tools.FirstOrDefaultAsync(x => x.ToolId == tools.ToolId);
+                    if (result is not null)
+                    {
+                        var data = await context.Services.FindAsync(tools.ToolId);
+                        data.Name = tools.Name;
+                        data.PeronalinfoId = tools.PeronalinfoId;
+                        this.context.Update(data);
+                        update = true;
+                    }
+                    else
+                    {
+                        await this.context.Tools.AddAsync(tools.ToolMapper());
+                        add = true;
+                    }
+                }
+                await context.SaveChangesAsync();
+
+                var Message = "";
+                if (update == true)
+                {
+                    Message = "Data Updated Successfully";
+                }
+                else if (update == true && add == true)
+                {
+                    Message = "Data Updated and Added Successfully";
                 }
                 else
                 {
-                    await this.context.Skills.AddRangeAsync(model.Skills.SkillMapper());
-                    await context.SaveChangesAsync();
-                    return new Response<OtherViewModel>
-                    {
-                        Message = "Data Added Successfully",
-                        Status = true
-                    };
+                    Message = "Data Added Successfully";
                 }
+
+                return new Response<OtherViewModel>
+                {
+                    Message = Message,
+                    Status = true
+                };
+
             }
             catch
             {

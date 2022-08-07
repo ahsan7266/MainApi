@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations.PortfolioMigrations
 {
     [DbContext(typeof(PortfolioDbContext))]
-    [Migration("20220807154830_Portfolio")]
+    [Migration("20220807171840_Portfolio")]
     partial class Portfolio
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -155,6 +155,23 @@ namespace Data.Migrations.PortfolioMigrations
                     b.HasKey("SkillId");
 
                     b.ToTable("Skills");
+                });
+
+            modelBuilder.Entity("Models.Model.PortfolioModel.Tool", b =>
+                {
+                    b.Property<Guid>("ToolId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PeronalinfoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ToolId");
+
+                    b.ToTable("Tools");
                 });
 #pragma warning restore 612, 618
         }

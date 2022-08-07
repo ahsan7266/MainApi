@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Models.Model.PortfolioViewModel;
 using Models.ViewModel;
+using Models.ViewModel.PortfolioViewModel;
 using Services.Services.Portfolio;
 
 namespace MyApi.Controllers
@@ -14,6 +15,15 @@ namespace MyApi.Controllers
         public PortfolioController(IPortfolioServices portfolioServices)
         {
             this.portfolioServices = portfolioServices;
+        }
+
+        [HttpPost("SkillServiceTool")]
+        public async Task<IActionResult> SkillServiceTool(OtherViewModel model)
+        {
+            var result = await portfolioServices.SkillServiceToolAsync(model);
+            if (result.Status)
+                return Ok(result);
+            return BadRequest(result);
         }
 
         //Get All
