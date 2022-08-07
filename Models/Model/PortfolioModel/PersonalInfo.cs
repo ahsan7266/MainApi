@@ -14,19 +14,18 @@ namespace Models.Model.PortfolioModel
         public Guid PeronalInfoId { get; set; }
         public string? Backgroundimg { get; set; }
         public string? Profileimg { get; set; }
+        public string? Cv { get; set; }
         [Column(TypeName = "nvarchar(25)")]
-        public string? Name { get; set; }
-        [Column(TypeName = "nvarchar(40)")]
+        public string? FirstName { get; set; }
+        [Column(TypeName = "nvarchar(25)")]
+        public string? LastName { get; set; }
         public string? Email { get; set; }
-        public string? Mobileno { get; set; }
+        public string? PhoneNumber { get; set; }
         [Column(TypeName = "nvarchar(20)")]
         public string? Country { get; set; }
         [Column(TypeName = "nvarchar(20)")]
         public string? City { get; set; }
         public int Age { get; set; }
-        [Column(TypeName = "nvarchar(20)")]
-        public string? Degree { get; set; }
-        public string? Website { get; set; }
         public string? Detail { get; set; }
         public string? Experience { get; set; }
         public DateTime CreatedDate { get; set; }

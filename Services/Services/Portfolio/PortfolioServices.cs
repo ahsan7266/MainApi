@@ -33,16 +33,17 @@ namespace Services.Services.Portfolio
                                   select new
                                   {
                                       Id = personalinfo.PeronalInfoId,
-                                      Name = personalinfo.Name,
+                                      FirstName = personalinfo.FirstName,
+                                      LastName = personalinfo.LastName,
                                       Backgroundimg = personalinfo.Backgroundimg,
                                       Profileimg = personalinfo.Profileimg,
+                                      CV = personalinfo.Cv,
                                       Email = personalinfo.Email,
-                                      Mobileno = personalinfo.Mobileno,
+                                      PhoneNumber = personalinfo.PhoneNumber,
                                       Country = personalinfo.Country,
                                       City = personalinfo.City,
                                       Age = personalinfo.Age,
-                                      Degree = personalinfo.Degree,
-                                      Website = personalinfo.Website,
+                                      Degree = personalinfo.Cv,
                                       Detail = personalinfo.Detail,
                                       Experience = personalinfo.Experience,
                                       CreatedDate = personalinfo.CreatedDate,
@@ -83,20 +84,21 @@ namespace Services.Services.Portfolio
                                   join service in context.Skills on personalinfo.PeronalInfoId equals service.PeronalinfoId
                                   join project in context.Projects on personalinfo.PeronalInfoId equals project.PeronalinfoId
                                   join projecttype in context.ProjectTypes on personalinfo.PeronalInfoId equals projecttype.PeronalinfoId
-                                  where personalinfo.Name == Name
+                                  where personalinfo.FirstName == Name || personalinfo.LastName == Name
                                   select new
                                   {
                                       Id = personalinfo.PeronalInfoId,
-                                      Name = personalinfo.Name,
+                                      FirstName = personalinfo.FirstName,
+                                      LastName = personalinfo.LastName,
                                       Backgroundimg = personalinfo.Backgroundimg,
                                       Profileimg = personalinfo.Profileimg,
+                                      CV = personalinfo.Cv,
                                       Email = personalinfo.Email,
-                                      Mobileno = personalinfo.Mobileno,
+                                      PhoneNumber = personalinfo.PhoneNumber,
                                       Country = personalinfo.Country,
                                       City = personalinfo.City,
                                       Age = personalinfo.Age,
-                                      Degree = personalinfo.Degree,
-                                      Website = personalinfo.Website,
+                                      Degree = personalinfo.Cv,
                                       Detail = personalinfo.Detail,
                                       Experience = personalinfo.Experience,
                                       CreatedDate = personalinfo.CreatedDate,
@@ -257,10 +259,10 @@ namespace Services.Services.Portfolio
                     Status = false
                 };
             //checking profileimage and backgroundimage
-            if (model.Backgroundimg is null && model.Profileimg is null)
+            if (model.Backgroundimg is null && model.Profileimg is null && model.Cv is null)
                 return new Response<PersonalInfoViewModel>
                 {
-                    Message = "Background & Profile Image is Not Found",
+                    Message = "Background, Profile Image & File is Not Found",
                     Status = false
                 };
             //checking file type or file extension
@@ -284,15 +286,21 @@ namespace Services.Services.Portfolio
 
             var backgroundfilename = Guid.NewGuid().ToString() + "_" + model.Backgroundimg.FileName;
             var profilefileName = Guid.NewGuid().ToString() + "_" + model.Profileimg.FileName;
+            var cvName = Guid.NewGuid().ToString() + "_" + model.Cv.FileName;
 
             string backgroundfilePath = Path.Combine(directorypath, backgroundfilename);
             string profilefilePath = Path.Combine(directorypath, profilefileName);
+            string cvPath = Path.Combine(directorypath, cvName);
 
             using (var filestream = new FileStream(backgroundfilePath, FileMode.Create))
             {
                 model.Backgroundimg.CopyTo(filestream);
             }
             using (var filestream = new FileStream(profilefilePath, FileMode.Create))
+            {
+                model.Profileimg.CopyTo(filestream);
+            }
+            using (var filestream = new FileStream(cvPath, FileMode.Create))
             {
                 model.Profileimg.CopyTo(filestream);
             }
@@ -304,14 +312,14 @@ namespace Services.Services.Portfolio
                 var data = await context.PersonalInfo.FindAsync(model.PeronalInfoId);
                 data.Backgroundimg = backgroundfilePath;
                 data.Profileimg = profilefilePath;
-                data.Name = model.Name;
+                data.Cv = cvPath;
+                data.FirstName = model.FirstName;
+                data.LastName = model.LastName;
                 data.Email = model.Email;
-                data.Mobileno = model.Mobileno;
+                data.PhoneNumber = model.PhoneNumber;
                 data.Age = model.Age;
                 data.Country = model.Country;
                 data.City = model.City;
-                data.Degree = model.Degree;
-                data.Website = model.Website;
                 data.Detail = model.Detail;
                 data.Experience = model.Experience;
                 data.UpdatedDate = DateTime.Now;
@@ -328,13 +336,12 @@ namespace Services.Services.Portfolio
                 PersonalInfo PI = new PersonalInfo();
                 PI.Backgroundimg = backgroundfilePath;
                 PI.Profileimg = profilefilePath;
-                PI.Name = model.Name;
+                PI.Cv = cvPath;
+                PI.FirstName = model.FirstName;
                 PI.Email = model.Email;
-                PI.Mobileno = model.Mobileno;
+                PI.PhoneNumber = model.PhoneNumber;
                 PI.Country = model.Country;
                 PI.City = model.City;
-                PI.Degree = model.Degree;
-                PI.Website = model.Website;
                 PI.Detail = model.Detail;
                 PI.Experience = model.Experience;
                 PI.CreatedDate = DateTime.Now;

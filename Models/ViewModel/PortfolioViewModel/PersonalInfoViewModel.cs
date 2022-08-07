@@ -15,14 +15,14 @@ namespace Models.Model.PortfolioViewModel
         public Guid PeronalInfoId { get; set; }
         public IFormFile? Backgroundimg { get; set; }
         public IFormFile? Profileimg { get; set; }
-        public string? Name { get; set; }
+        public IFormFile? Cv { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
         public string? Email { get; set; }
-        public string? Mobileno { get; set; }
+        public string? PhoneNumber { get; set; }
         public string? Country { get; set; }
         public string? City { get; set; }
         public int Age { get; set; }
-        public string? Degree { get; set; }
-        public string? Website { get; set; }
         public string? Detail { get; set; }
         public string? Experience { get; set; }
         public DateTime CreatedDate { get; set; }
@@ -38,13 +38,13 @@ namespace Models.Model.PortfolioViewModel
             {
                 PersonalInfoViewModel res = new PersonalInfoViewModel();
                 res.PeronalInfoId = item.PeronalInfoId;
-                res.Name = item.Name;
+                res.FirstName = item.FirstName;
+                res.LastName = item.LastName;
                 res.Email = item.Email;
+                res.PhoneNumber = item.PhoneNumber;
                 res.Age = item.Age;
                 res.Country = item.Country;
                 res.City = item.City;
-                res.Degree = item.Degree;
-                res.Website = item.Website;
                 res.Detail = item.Detail;
                 res.Experience = item.Experience;
                 res.CreatedDate = item.CreatedDate;
@@ -58,13 +58,13 @@ namespace Models.Model.PortfolioViewModel
         {
             PersonalInfoViewModel res = new PersonalInfoViewModel();
             res.PeronalInfoId = data.PeronalInfoId;
-            res.Name = data.Name;
+            res.FirstName = data.FirstName;
+            res.LastName = data.LastName;
             res.Email = data.Email;
             res.Age = data.Age;
             res.Country = data.Country;
             res.City = data.City;
-            res.Degree = data.Degree;
-            res.Website = data.Website;
+            res.PhoneNumber = data.PhoneNumber;
             res.Detail = data.Detail;
             res.Experience = data.Experience;
             res.CreatedDate = data.CreatedDate;
@@ -76,13 +76,13 @@ namespace Models.Model.PortfolioViewModel
         {
             PersonalInfo res = new PersonalInfo();
             res.PeronalInfoId = data.PeronalInfoId;
-            res.Name = data.Name;
+            res.FirstName = data.FirstName;
+            res.LastName = data.LastName;
             res.Email = data.Email;
             res.Age = data.Age;
             res.Country = data.Country;
             res.City = data.City;
-            res.Degree = data.Degree;
-            res.Website = data.Website;
+            res.PhoneNumber = data.PhoneNumber;
             res.Detail = data.Detail;
             res.Experience = data.Experience;
             res.CreatedDate = data.CreatedDate;
