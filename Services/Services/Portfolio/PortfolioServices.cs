@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Models.Model.PortfolioModel;
 using Models.Model.PortfolioViewModel;
 using Models.ViewModel;
+using Models.ViewModel.PortfolioViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,6 +28,7 @@ namespace Services.Services.Portfolio
                 var data = await (from personalinfo in context.PersonalInfo
                                   join skill in context.Skills on personalinfo.PeronalInfoId equals skill.PeronalinfoId
                                   join service in context.Skills on personalinfo.PeronalInfoId equals service.PeronalinfoId
+                                  join tool in context.Tools on personalinfo.PeronalInfoId equals tool.PeronalinfoId
                                   join project in context.Projects on personalinfo.PeronalInfoId equals project.PeronalinfoId
                                   join projecttype in context.ProjectTypes on personalinfo.PeronalInfoId equals projecttype.PeronalinfoId
                                   where personalinfo.PeronalInfoId == Id
@@ -51,6 +53,7 @@ namespace Services.Services.Portfolio
                                       SkillName = skill.Name,
                                       SkillPercentage = skill.Percentage,
                                       ServiceName = service.Name,
+                                      ToolName = tool.Name,
                                       ProjectName = project.Name,
                                       ProjectImage = project.Img,
                                       ProjectUrl = project.Url,
@@ -82,6 +85,7 @@ namespace Services.Services.Portfolio
                 var data = await (from personalinfo in context.PersonalInfo
                                   join skill in context.Skills on personalinfo.PeronalInfoId equals skill.PeronalinfoId
                                   join service in context.Skills on personalinfo.PeronalInfoId equals service.PeronalinfoId
+                                  join tool in context.Tools on personalinfo.PeronalInfoId equals tool.PeronalinfoId
                                   join project in context.Projects on personalinfo.PeronalInfoId equals project.PeronalinfoId
                                   join projecttype in context.ProjectTypes on personalinfo.PeronalInfoId equals projecttype.PeronalinfoId
                                   where personalinfo.FirstName == Name || personalinfo.LastName == Name
@@ -106,6 +110,7 @@ namespace Services.Services.Portfolio
                                       SkillName = skill.Name,
                                       SkillPercentage = skill.Percentage,
                                       ServiceName = service.Name,
+                                      ToolName = tool.Name,
                                       ProjectName = project.Name,
                                       ProjectImage = project.Img,
                                       ProjectUrl = project.Url,
@@ -201,6 +206,29 @@ namespace Services.Services.Portfolio
                 throw;
             }
         }
+        public async Task<Response<ToolViewModel>> GetToolAsync()
+        {
+            try
+            {
+                var data = await context.Tools.ToListAsync();
+                if (data is null)
+                    return new Response<ToolViewModel>
+                    {
+                        Message = "Record Not Found",
+                        Status = false
+                    };
+                return new Response<ToolViewModel>
+                {
+                    Message = "Record Found Successfully",
+                    Status = true,
+                    List = data.ToolMapperList()
+                };
+            }
+            catch
+            {
+                throw;
+            }
+        }
         public async Task<Response<ProjectsViewModel>> GetProjectAsync()
         {
             try
@@ -249,18 +277,18 @@ namespace Services.Services.Portfolio
         }
 
         // Add or Update
-        public async Task<Response<PersonalInfoViewModel>> AddorUpdatePersonalInfoAsync(PersonalInfoViewModel model)
+        public async Task<Response<string>> AddorUpdatePersonalInfoAsync(PersonalInfoViewModel model)
         {
             //checking model 
             if (model is null)
-                return new Response<PersonalInfoViewModel>
+                return new Response<string>
                 {
                     Message = "Model is Empty",
                     Status = false
                 };
             //checking profileimage and backgroundimage
             if (model.Backgroundimg is null && model.Profileimg is null && model.Cv is null)
-                return new Response<PersonalInfoViewModel>
+                return new Response<string>
                 {
                     Message = "Background, Profile Image & File is Not Found",
                     Status = false
@@ -270,7 +298,7 @@ namespace Services.Services.Portfolio
             var profilefiletype = model.Profileimg.FileName.Substring(model.Profileimg.FileName.LastIndexOf('.'));
 
             if (backgroundfiletype != ".jpg" && backgroundfiletype != "jpeg" && backgroundfiletype != "png" && profilefiletype != ".jpg" && profilefiletype != "jpeg" && profilefiletype != "png")
-                return new Response<PersonalInfoViewModel>
+                return new Response<string>
                 {
                     Message = "File Extension Is Not Valid Support Only JPG,JPEG PNG",
                     Status = false
@@ -325,7 +353,7 @@ namespace Services.Services.Portfolio
                 data.UpdatedDate = DateTime.Now;
                 this.context.Update(data);
                 await context.SaveChangesAsync();
-                return new Response<PersonalInfoViewModel>
+                return new Response<string>
                 {
                     Message = "Data Updated Successfully",
                     Status = true
@@ -348,10 +376,12 @@ namespace Services.Services.Portfolio
                 PI.UpdatedDate = DateTime.Now;
                 await this.context.PersonalInfo.AddAsync(PI);
                 await context.SaveChangesAsync();
-                return new Response<PersonalInfoViewModel>
+                var ID = PI.PeronalInfoId;
+                return new Response<string>
                 {
                     Message = "Data Added Successfully",
-                    Status = true
+                    Status = true,
+                    Data = ID.ToString()
                 };
             }
         }       
@@ -426,6 +456,46 @@ namespace Services.Services.Portfolio
                     await this.context.Services.AddAsync(model.ServiceMapper());
                     await context.SaveChangesAsync();
                     return new Response<ServiceViewModel>
+                    {
+                        Message = "Data Added Successfully",
+                        Status = true
+                    };
+                }
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        public async Task<Response<ToolViewModel>> AddorUpdateToolAsync(ToolViewModel model)
+        {
+            try
+            {
+                if (model is null)
+                    return new Response<ToolViewModel>
+                    {
+                        Message = "Model is Empty",
+                        Status = false
+                    };
+                var result = await context.Tools.FirstOrDefaultAsync(x => x.ToolId == model.ToolId);
+                if (result is not null)
+                {
+                    var data = await context.Tools.FindAsync(model.ToolId);
+                    data.Name = model.Name;
+                    data.PeronalinfoId = model.PeronalinfoId;
+                    this.context.Update(data);
+                    await context.SaveChangesAsync();
+                    return new Response<ToolViewModel>
+                    {
+                        Message = "Data Updated Successfully",
+                        Status = true
+                    };
+                }
+                else
+                {
+                    await this.context.Tools.AddAsync(model.ToolMapper());
+                    await context.SaveChangesAsync();
+                    return new Response<ToolViewModel>
                     {
                         Message = "Data Added Successfully",
                         Status = true
@@ -645,6 +715,35 @@ namespace Services.Services.Portfolio
                 throw;
             }
         }
+        public async Task<Response<ToolViewModel>> GetByToolIdAsync(Guid ToolId)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(ToolId.ToString()))
+                    return new Response<ToolViewModel>
+                    {
+                        Message = "Id is Empty",
+                        Status = false
+                    };
+                var data = await context.Tools.FindAsync(ToolId);
+                if (data is null)
+                    return new Response<ToolViewModel>
+                    {
+                        Message = "Record Not Found",
+                        Status = false
+                    };
+                return new Response<ToolViewModel>
+                {
+                    Message = "Record Found Successfully",
+                    Status = true,
+                    Data = data.ToolMapper()
+                };
+            }
+            catch
+            {
+                throw;
+            }
+        }
         public async Task<Response<ProjectsViewModel>> GetByProjectIdAsync(Guid ProjectId)
         {
             try
@@ -788,6 +887,36 @@ namespace Services.Services.Portfolio
                 throw;
             }
         }
+        public async Task<Response<ToolViewModel>> DeleteToolIdAsync(Guid ToolId)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(ToolId.ToString()))
+                    return new Response<ToolViewModel>
+                    {
+                        Message = "Id is Empty",
+                        Status = false
+                    };
+                var data = await context.Tools.FindAsync(ToolId);
+                if (data is null)
+                    return new Response<ToolViewModel>
+                    {
+                        Message = "Record Not Found",
+                        Status = false
+                    };
+                context.Tools.Remove(data);
+                await context.SaveChangesAsync();
+                return new Response<ToolViewModel>
+                {
+                    Message = "Record Delted Successfully",
+                    Status = true
+                };
+            }
+            catch
+            {
+                throw;
+            }
+        }
         public async Task<Response<ProjectsViewModel>> DeleteProjectIdAsync(Guid ProjectId)
         {
             try
@@ -842,6 +971,47 @@ namespace Services.Services.Portfolio
                     Message = "Record Delted Successfully",
                     Status = true
                 };
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<Response<OtherViewModel>> SkillServiceToolAsync(OtherViewModel model)
+        {
+            try
+            {
+                if (model is null)
+                    return new Response<OtherViewModel>
+                    {
+                        Message = "Model is Empty",
+                        Status = false
+                    };
+                var result = await context.Skills.FirstOrDefaultAsync(x => x.PeronalinfoId == model.Skills.PeronalinfoId);
+                if (result is not null)
+                {
+                    var data = await context.Skills.FindAsync(model.Skills.PeronalinfoId);
+                    data.Name = model.Skills.Name;
+                    data.PeronalinfoId = model.Skills.PeronalinfoId;
+                    this.context.Update(data);
+                    await context.SaveChangesAsync();
+                    return new Response<OtherViewModel>
+                    {
+                        Message = "Data Updated Successfully",
+                        Status = true
+                    };
+                }
+                else
+                {
+                    await this.context.Skills.AddRangeAsync(model.Skills.SkillMapper());
+                    await context.SaveChangesAsync();
+                    return new Response<OtherViewModel>
+                    {
+                        Message = "Data Added Successfully",
+                        Status = true
+                    };
+                }
             }
             catch
             {

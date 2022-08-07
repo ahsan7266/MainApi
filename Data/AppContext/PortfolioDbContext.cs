@@ -17,6 +17,7 @@ namespace Data.AppContext
         public DbSet<PersonalInfo> PersonalInfo { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<Skill> Skills { get; set; }
+        public DbSet<Tool> Tools { get; set; }
         public DbSet<ProjectType> ProjectTypes { get; set; }
         public DbSet<Projects> Projects { get; set; }
     }
