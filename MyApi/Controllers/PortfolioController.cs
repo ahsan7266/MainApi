@@ -88,12 +88,12 @@ namespace MyApi.Controllers
 
         // Add or Update
         [HttpPost("AddOrUpdatePersonalInfo")]
-        public async Task<IActionResult> AddOrUpdatePersonalInfo([FromForm] PersonalInfoViewModel model)
+        public async Task<IActionResult> AddOrUpdatePersonalInfo(PersonalInfoViewModel model)
         {
             var result = await portfolioServices.AddorUpdatePersonalInfoAsync(model);
             if (result.Status)
                 return Ok(result);
-            return BadRequest(result);
+            return BadRequest();
         }
         [HttpPost("AddOrUpdateSkill")]
         public async Task<IActionResult> AddOrUpdateSkill(SkillViewModel model)

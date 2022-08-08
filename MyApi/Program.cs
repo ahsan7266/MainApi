@@ -101,7 +101,7 @@ app.UseExceptionHandler("/exception");
 app.UseHttpsRedirection();
 
 app.UseCors(MyCorsPolicy);
-
+app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 
