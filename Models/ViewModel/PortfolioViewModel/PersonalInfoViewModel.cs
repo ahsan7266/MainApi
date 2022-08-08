@@ -14,11 +14,14 @@ namespace Models.Model.PortfolioViewModel
     {
         public Guid PeronalInfoId { get; set; }
         public string? BackgroundBas64 { get; set; }
-        public IFormFile? Backgroundimg { get; set; }
+        public string? BackgroundName { get; set; }
+        public string? BackgroundFileName { get; set; }
         public string? ProfileBas64 { get; set; }
-        public IFormFile? Profileimg { get; set; }
+        public string? ProfileName { get; set; }
+        public string? ProfileFileName { get; set; }
         public string? CvBas64 { get; set; }
-        public IFormFile? Cv { get; set; }
+        public string? CvName { get; set; }
+        public string? CvFileName { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Email { get; set; }

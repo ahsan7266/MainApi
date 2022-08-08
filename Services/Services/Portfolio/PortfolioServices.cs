@@ -1,4 +1,5 @@
 ﻿using Data.AppContext;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Models.Model.PortfolioModel;
 using Models.Model.PortfolioViewModel;
@@ -287,15 +288,29 @@ namespace Services.Services.Portfolio
                     Status = false
                 };
             //checking profileimage and backgroundimage
-            if (model.Backgroundimg is null && model.Profileimg is null && model.Cv is null)
+            if (model.BackgroundBas64 is null && model.ProfileBas64 is null && model.CvBas64 is null)
                 return new Response<string>
                 {
                     Message = "Background, Profile Image & File is Not Found",
                     Status = false
                 };
+
+            byte[] backgroundBytes = Convert.FromBase64String(model.BackgroundBas64);
+            MemoryStream backgroundStream = new MemoryStream(backgroundBytes);
+            IFormFile Backgroundimg = new FormFile(backgroundStream, 0, backgroundBytes.Length, model.BackgroundName, model.BackgroundFileName);
+
+            byte[] profileBytes = Convert.FromBase64String(model.BackgroundBas64);
+            MemoryStream profileStream = new MemoryStream(profileBytes);
+            IFormFile Profileimg = new FormFile(profileStream, 0, profileBytes.Length, model.ProfileName, model.ProfileFileName);
+
+            byte[] cvBytes = Convert.FromBase64String(model.BackgroundBas64);
+            MemoryStream cvStream = new MemoryStream(cvBytes);
+            IFormFile Cv = new FormFile(cvStream, 0, cvBytes.Length, model.CvName, model.CvFileName);
+
+
             //checking file type or file extension
-            var backgroundfiletype = model.Backgroundimg.FileName.Substring(model.Backgroundimg.FileName.LastIndexOf('.'));
-            var profilefiletype = model.Profileimg.FileName.Substring(model.Profileimg.FileName.LastIndexOf('.'));
+            var backgroundfiletype = Backgroundimg.FileName.Substring(Backgroundimg.FileName.LastIndexOf('.'));
+            var profilefiletype = Profileimg.FileName.Substring(Profileimg.FileName.LastIndexOf('.'));
 
             if (backgroundfiletype != ".jpg" && backgroundfiletype != "jpeg" && backgroundfiletype != "png" && profilefiletype != ".jpg" && profilefiletype != "jpeg" && profilefiletype != "png")
                 return new Response<string>
@@ -312,9 +327,9 @@ namespace Services.Services.Portfolio
                 Directory.CreateDirectory(directorypath);
             }
 
-            var backgroundfilename = Guid.NewGuid().ToString() + "_" + model.Backgroundimg.FileName;
-            var profilefileName = Guid.NewGuid().ToString() + "_" + model.Profileimg.FileName;
-            var cvName = Guid.NewGuid().ToString() + "_" + model.Cv.FileName;
+            var backgroundfilename = Guid.NewGuid().ToString() + "_" + Backgroundimg.FileName;
+            var profilefileName = Guid.NewGuid().ToString() + "_" + Profileimg.FileName;
+            var cvName = Guid.NewGuid().ToString() + "_" + Cv.FileName;
 
             string backgroundfilePath = Path.Combine(directorypath, backgroundfilename);
             string profilefilePath = Path.Combine(directorypath, profilefileName);
@@ -322,15 +337,15 @@ namespace Services.Services.Portfolio
 
             using (var filestream = new FileStream(backgroundfilePath, FileMode.Create))
             {
-                model.Backgroundimg.CopyTo(filestream);
+                Backgroundimg.CopyTo(filestream);
             }
             using (var filestream = new FileStream(profilefilePath, FileMode.Create))
             {
-                model.Profileimg.CopyTo(filestream);
+                Profileimg.CopyTo(filestream);
             }
             using (var filestream = new FileStream(cvPath, FileMode.Create))
             {
-                model.Profileimg.CopyTo(filestream);
+                Cv.CopyTo(filestream);
             }
 
             //AddorUpdate Personal Info 
