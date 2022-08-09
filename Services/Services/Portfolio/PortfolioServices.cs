@@ -585,38 +585,25 @@ namespace Services.Services.Portfolio
                     Img.CopyTo(filestream);
                 }
 
-                //RarFile
-                //using (FileStream fs = new FileStream(ProjectFile, FileMode.Open))
-                //using (ZipArchive archive1 = new ZipArchive(fs, ZipArchiveMode.Read))
-                //{
-                //    // Get a root entry file
-                //    archive1.GetEntry("test.txt").ExtractToFile("test_extracted_getentries.txt", true);
-
-                //    // Enter a path if you want to extract files from a subdirectory
-                //    archive1.GetEntry("sub/subtest.txt").ExtractToFile("test_sub.txt", true);
-
-                //    // You can also use the Entries property to find files
-                //    var archivedata = archive1.Entries.ToList();
-                //        .ExtractToFile("test_extracted_linq.txt", true);
-
-                //    // This will throw a System.ArgumentNullException because the file cannot be found
-                //    archive.GetEntry("nonexistingfile.txt").ExtractToFile("fail.txt", true);
-                //}
                 //ZipFile
                 var stream = ProjectFile.OpenReadStream();
                 var archive = new ZipArchive(stream);
-                var archivedata = archive.Entries.ToList();
-                foreach (ZipArchiveEntry item in archivedata)
+                foreach (ZipArchiveEntry entry in archive.Entries)
                 {
-                    var filepath  = item.FullName.Substring(0, item.FullName.LastIndexOf('/'));
+                    var filepath  = entry.FullName.Substring(0, entry.FullName.LastIndexOf('/'));
                     var projectfolderpath = "wwwroot/Projects/" + filepath;
                     var projectdirectorypath = Path.Combine(basedirectory, projectfolderpath);
                     if (!Directory.Exists(projectdirectorypath))
                     {
                         Directory.CreateDirectory(projectdirectorypath);
                     }
-                    archive.GetEntry(item.Name)?.ExtractToFile(projectdirectorypath, true);
-                    item.ExtractToFile(projectdirectorypath, true);
+
+                    int pos = entry.FullName.LastIndexOf("/") + 1;
+                    var check = entry.FullName.Substring(pos, entry.FullName.Length - pos);
+                    if (!string.IsNullOrEmpty(check))
+                    {
+                        entry.ExtractToFile(Path.Combine(projectdirectorypath, entry.Name), true);
+                    }
                 }
 
                 var result = await context.Projects.FirstOrDefaultAsync(x => x.ProjectId == model.ProjectId);
