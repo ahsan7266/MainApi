@@ -5,8 +5,10 @@ using Models.Model.PortfolioModel;
 using Models.Model.PortfolioViewModel;
 using Models.ViewModel;
 using Models.ViewModel.PortfolioViewModel;
+using SharpCompress.Archives.Rar;
 using System;
 using System.Collections.Generic;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -353,9 +355,18 @@ namespace Services.Services.Portfolio
             if (result is not null)
             {
                 var data = await context.PersonalInfo.FindAsync(model.PeronalInfoId);
-                data.Backgroundimg = backgroundfilePath;
-                data.Profileimg = profilefilePath;
-                data.Cv = cvPath;
+                if (backgroundfilePath is not null)
+                {
+                    data.Backgroundimg = backgroundfilePath;
+                }
+                if (backgroundfilePath is not null)
+                {
+                    data.Profileimg = profilefilePath;
+                }
+                if (backgroundfilePath is not null)
+                {
+                    data.Cv = cvPath;
+                }               
                 data.FirstName = model.FirstName;
                 data.LastName = model.LastName;
                 data.Email = model.Email;
@@ -534,14 +545,23 @@ namespace Services.Services.Portfolio
                         Status = false
                     };
                 //checking profileimage and backgroundimage
-                if (model.Img is null)
+                if (model.ImgBase64 is null && model.ProjectFileBase64 is null)
                     return new Response<ProjectsViewModel>
                     {
-                        Message = "Background & Profile Image is Not Found",
+                        Message = "Project Iamge & Project File is Not Found",
                         Status = false
                     };
+
+                byte[] imageBytes = Convert.FromBase64String(model.ImgBase64);
+                MemoryStream imageStream = new MemoryStream(imageBytes);
+                IFormFile Img = new FormFile(imageStream, 0, imageBytes.Length, model.ImgName, model.ImgFileName);
+
+                byte[] fileBytes = Convert.FromBase64String(model.ProjectFileBase64);
+                MemoryStream fileStream = new MemoryStream(fileBytes);
+                IFormFile ProjectFile = new FormFile(fileStream, 0, fileBytes.Length, model.ProjectFName, model.ProjectFileName);
+
                 //checking file type or file extension
-                var filetype = model.Img.FileName.Substring(model.Img.FileName.LastIndexOf('.'));
+                var filetype = Img.FileName.Substring(Img.FileName.LastIndexOf('.'));
                 if (filetype != ".jpg" && filetype != "jpeg" && filetype != "png")
                     return new Response<ProjectsViewModel>
                     {
@@ -556,11 +576,47 @@ namespace Services.Services.Portfolio
                 {
                     Directory.CreateDirectory(directorypath);
                 }
-                var filename = Guid.NewGuid().ToString() + "_" + model.Img.FileName;
-                string imagepath = Path.Combine(directorypath, filename);
+                
+                //iamge
+                var imgfilename = Guid.NewGuid().ToString() + "_" + Img.FileName;
+                string imagepath = Path.Combine(directorypath, imgfilename);
                 using (var filestream = new FileStream(imagepath, FileMode.Create))
                 {
-                    model.Img.CopyTo(filestream);
+                    Img.CopyTo(filestream);
+                }
+
+                //RarFile
+                //using (FileStream fs = new FileStream(ProjectFile, FileMode.Open))
+                //using (ZipArchive archive1 = new ZipArchive(fs, ZipArchiveMode.Read))
+                //{
+                //    // Get a root entry file
+                //    archive1.GetEntry("test.txt").ExtractToFile("test_extracted_getentries.txt", true);
+
+                //    // Enter a path if you want to extract files from a subdirectory
+                //    archive1.GetEntry("sub/subtest.txt").ExtractToFile("test_sub.txt", true);
+
+                //    // You can also use the Entries property to find files
+                //    var archivedata = archive1.Entries.ToList();
+                //        .ExtractToFile("test_extracted_linq.txt", true);
+
+                //    // This will throw a System.ArgumentNullException because the file cannot be found
+                //    archive.GetEntry("nonexistingfile.txt").ExtractToFile("fail.txt", true);
+                //}
+                //ZipFile
+                var stream = ProjectFile.OpenReadStream();
+                var archive = new ZipArchive(stream);
+                var archivedata = archive.Entries.ToList();
+                foreach (ZipArchiveEntry item in archivedata)
+                {
+                    var filepath  = item.FullName.Substring(0, item.FullName.LastIndexOf('/'));
+                    var projectfolderpath = "wwwroot/Projects/" + filepath;
+                    var projectdirectorypath = Path.Combine(basedirectory, projectfolderpath);
+                    if (!Directory.Exists(projectdirectorypath))
+                    {
+                        Directory.CreateDirectory(projectdirectorypath);
+                    }
+                    archive.GetEntry(item.Name)?.ExtractToFile(projectdirectorypath, true);
+                    item.ExtractToFile(projectdirectorypath, true);
                 }
 
                 var result = await context.Projects.FirstOrDefaultAsync(x => x.ProjectId == model.ProjectId);

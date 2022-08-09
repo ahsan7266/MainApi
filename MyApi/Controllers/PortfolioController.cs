@@ -112,7 +112,7 @@ namespace MyApi.Controllers
             return BadRequest(result);
         }
         [HttpPost("AddOrUpdateProject")]
-        public async Task<IActionResult> AddOrUpdateProject([FromForm] ProjectsViewModel model)
+        public async Task<IActionResult> AddOrUpdateProject(ProjectsViewModel model)
         {
             var result = await portfolioServices.AddorUpdateProjectAsync(model);
             if (result.Status)
