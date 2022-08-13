@@ -23,7 +23,7 @@ namespace Models.Model.PortfolioViewModel
         public string? ProjectFName { get; set; }
         public string? ProjectFileName { get; set; }
 
-        public string? Url { get; set; }
+        public string? ProjectLink { get; set; }
         public string? Type { get; set; }
         public Guid PeronalinfoId { get; set; }
     }
@@ -38,7 +38,7 @@ namespace Models.Model.PortfolioViewModel
                 ProjectsViewModel res = new ProjectsViewModel();
                 res.ProjectId = item.ProjectId;
                 res.Name = item.Name;
-                res.Url = item.Url;
+                res.ProjectLink = item.Url;
                 res.Type = item.Type;
                 res.PeronalinfoId = item.PeronalinfoId;
                 list.Add(res);
@@ -51,7 +51,7 @@ namespace Models.Model.PortfolioViewModel
             ProjectsViewModel res = new ProjectsViewModel();
             res.ProjectId = data.ProjectId;
             res.Name = data.Name;
-            res.Url = data.Url;
+            res.ProjectLink = data.Url;
             res.Type = data.Type;
             res.PeronalinfoId = data.PeronalinfoId;
             return res;
@@ -62,7 +62,7 @@ namespace Models.Model.PortfolioViewModel
             Projects res = new Projects();
             res.ProjectId = data.ProjectId;
             res.Name = data.Name; 
-            res.Url = data.Url;
+            res.Url = data.ProjectLink;
             res.Type = data.Type;
             res.PeronalinfoId = data.PeronalinfoId;
             return res;

@@ -28,52 +28,68 @@ namespace Services.Services.Portfolio
         {
             try
             {
-                var data = await (from personalinfo in context.PersonalInfo
-                                  join skill in context.Skills on personalinfo.PeronalInfoId equals skill.PeronalinfoId
-                                  join service in context.Skills on personalinfo.PeronalInfoId equals service.PeronalinfoId
-                                  join tool in context.Tools on personalinfo.PeronalInfoId equals tool.PeronalinfoId
-                                  join project in context.Projects on personalinfo.PeronalInfoId equals project.PeronalinfoId
-                                  join projecttype in context.ProjectTypes on personalinfo.PeronalInfoId equals projecttype.PeronalinfoId
-                                  where personalinfo.PeronalInfoId == Id
-                                  select new
-                                  {
-                                      Id = personalinfo.PeronalInfoId,
-                                      FirstName = personalinfo.FirstName,
-                                      LastName = personalinfo.LastName,
-                                      Backgroundimg = personalinfo.Backgroundimg,
-                                      Profileimg = personalinfo.Profileimg,
-                                      CV = personalinfo.Cv,
-                                      Email = personalinfo.Email,
-                                      PhoneNumber = personalinfo.PhoneNumber,
-                                      Country = personalinfo.Country,
-                                      City = personalinfo.City,
-                                      Age = personalinfo.Age,
-                                      Degree = personalinfo.Cv,
-                                      Detail = personalinfo.Detail,
-                                      Experience = personalinfo.Experience,
-                                      CreatedDate = personalinfo.CreatedDate,
-                                      UpdatedDate = personalinfo.UpdatedDate,
-                                      SkillName = skill.Name,
-                                      SkillPercentage = skill.Percentage,
-                                      ServiceName = service.Name,
-                                      ToolName = tool.Name,
-                                      ProjectName = project.Name,
-                                      ProjectImage = project.Img,
-                                      ProjectUrl = project.Url,
-                                      ProjectType = project.Type,
-                                      ProjectTypeName = projecttype.Name,
-                                  }).ToListAsync();
-                if (data is null)
+                if (string.IsNullOrWhiteSpace(Id.ToString()))
                     return new Response<object>
                     {
-                        Message = "Record Not Found",
+                        Message = "Id Is Empty"
+                    };
+
+
+                var getPersnalInfo = await context.PersonalInfo.Where(x => x.PeronalInfoId == Id).ToListAsync();
+                if (getPersnalInfo is null)
+                    return new Response<object>
+                    {
+                        Message = "PersnalInfo Record Not Found",
                         Status = false
                     };
+
+                var getSkills = await context.Skills.Where(x => x.PeronalinfoId == Id).ToListAsync();
+                if (getSkills is null)
+                    return new Response<object>
+                    {
+                        Message = "Skills Record Not Found",
+                        Status = false
+                    };
+
+                var getServices = await context.Services.Where(x => x.PeronalinfoId == Id).ToListAsync();
+                if (getServices is null)
+                    return new Response<object>
+                    {
+                        Message = "Services Record Not Found",
+                        Status = false
+                    };
+
+                var getTools = await context.Tools.Where(x => x.PeronalinfoId == Id).ToListAsync();
+               
+                var getProject = await context.Projects.Where(x => x.PeronalinfoId == Id).ToListAsync();
+                if (getProject is null)
+                    return new Response<object>
+                    {
+                        Message = "Project Record Not Found",
+                        Status = false
+                    };
+
+                var getProjectType = await context.ProjectTypes.Where(x => x.PeronalinfoId == Id).ToListAsync();
+                if (getProjectType is null)
+                    return new Response<object>
+                    {
+                        Message = "Project Type Record Not Found",
+                        Status = false
+                    };
+
                 return new Response<object>
                 {
                     Message = "Record Found Successfully",
                     Status = true,
-                    Data = data
+                    Data = new
+                    {
+                        PersnalInfo = getPersnalInfo,
+                        Skills = getSkills,
+                        Services = getServices,
+                        Tools = getTools,
+                        Projects = getProject,
+                        ProjectType = getProjectType,
+                    }
                 };
             }
             catch
@@ -544,22 +560,18 @@ namespace Services.Services.Portfolio
                         Message = "Model is Empty",
                         Status = false
                     };
-                //checking profileimage and backgroundimage
-                if (model.ImgBase64 is null && model.ProjectFileBase64 is null)
+                //checking ProjectImage 
+                if (model.ImgBase64 is null)
                     return new Response<ProjectsViewModel>
                     {
-                        Message = "Project Iamge & Project File is Not Found",
+                        Message = "Project Iamge is Not Found",
                         Status = false
                     };
 
                 byte[] imageBytes = Convert.FromBase64String(model.ImgBase64);
                 MemoryStream imageStream = new MemoryStream(imageBytes);
                 IFormFile Img = new FormFile(imageStream, 0, imageBytes.Length, model.ImgName, model.ImgFileName);
-
-                byte[] fileBytes = Convert.FromBase64String(model.ProjectFileBase64);
-                MemoryStream fileStream = new MemoryStream(fileBytes);
-                IFormFile ProjectFile = new FormFile(fileStream, 0, fileBytes.Length, model.ProjectFName, model.ProjectFileName);
-
+                                
                 //checking file type or file extension
                 var filetype = Img.FileName.Substring(Img.FileName.LastIndexOf('.'));
                 if (filetype != ".jpg" && filetype != "jpeg" && filetype != "png")
@@ -585,26 +597,37 @@ namespace Services.Services.Portfolio
                     Img.CopyTo(filestream);
                 }
 
-                //ZipFile
-                var stream = ProjectFile.OpenReadStream();
-                var archive = new ZipArchive(stream);
-                foreach (ZipArchiveEntry entry in archive.Entries)
+                var ProjectPath = "";
+                if (model.ProjectFileBase64 is not null)
                 {
-                    var filepath  = entry.FullName.Substring(0, entry.FullName.LastIndexOf('/'));
-                    var projectfolderpath = "wwwroot/Projects/" + filepath;
-                    var projectdirectorypath = Path.Combine(basedirectory, projectfolderpath);
-                    if (!Directory.Exists(projectdirectorypath))
-                    {
-                        Directory.CreateDirectory(projectdirectorypath);
-                    }
+                    byte[] fileBytes = Convert.FromBase64String(model.ProjectFileBase64);
+                    MemoryStream fileStream = new MemoryStream(fileBytes);
+                    IFormFile ProjectFile = new FormFile(fileStream, 0, fileBytes.Length, model.ProjectFName, model.ProjectFileName);
 
-                    int pos = entry.FullName.LastIndexOf("/") + 1;
-                    var check = entry.FullName.Substring(pos, entry.FullName.Length - pos);
-                    if (!string.IsNullOrEmpty(check))
+                    //ZipFile
+                    var stream = ProjectFile.OpenReadStream();
+                    var archive = new ZipArchive(stream);
+                    foreach (ZipArchiveEntry entry in archive.Entries)
                     {
-                        entry.ExtractToFile(Path.Combine(projectdirectorypath, entry.Name), true);
+                        var filepath = entry.FullName.Substring(0, entry.FullName.LastIndexOf('/'));
+                        var projectfolderpath = "wwwroot/Projects/" + filepath;
+                        var projectdirectorypath = Path.Combine(basedirectory, projectfolderpath);
+                        if (!Directory.Exists(projectdirectorypath))
+                        {
+                            Directory.CreateDirectory(projectdirectorypath);
+                        }
+
+                        int pos = entry.FullName.LastIndexOf("/") + 1;
+                        var check = entry.FullName.Substring(pos, entry.FullName.Length - pos);
+                        if (!string.IsNullOrEmpty(check))
+                        {
+                            entry.ExtractToFile(Path.Combine(projectdirectorypath, entry.Name), true);
+                        }
+
+                        ProjectPath = projectdirectorypath + entry;
                     }
                 }
+                
 
                 var result = await context.Projects.FirstOrDefaultAsync(x => x.ProjectId == model.ProjectId);
                 if (result is not null)
@@ -612,7 +635,14 @@ namespace Services.Services.Portfolio
                     var data = await context.Projects.FindAsync(model.ProjectId);
                     data.Name = model.Name;
                     data.Img = imagepath;
-                    data.Url = model.Url;
+                    if (model.ProjectFileBase64 is not null)
+                    {
+                        data.Url = ProjectPath;
+                    }
+                    else
+                    {
+                        data.Url = model.ProjectLink;
+                    }
                     data.Type = model.Type;
                     data.PeronalinfoId = model.PeronalinfoId;
                     this.context.Update(data);
@@ -628,7 +658,14 @@ namespace Services.Services.Portfolio
                     Projects project = new Projects();
                     project.Name = model.Name;
                     project.Img = imagepath;
-                    project.Url = model.Url;
+                    if (model.ProjectFileBase64 is not null)
+                    {
+                        project.Url = ProjectPath;
+                    }
+                    else
+                    {
+                        project.Url = model.ProjectLink;
+                    }
                     project.Type = model.Type;
                     project.PeronalinfoId = model.PeronalinfoId;
                     await this.context.Projects.AddAsync(project);
