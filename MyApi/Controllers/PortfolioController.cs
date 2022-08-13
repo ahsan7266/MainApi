@@ -112,6 +112,7 @@ namespace MyApi.Controllers
             return BadRequest(result);
         }
         [HttpPost("AddOrUpdateProject")]
+        [DisableRequestSizeLimit, RequestFormLimits(MultipartBodyLengthLimit = int.MaxValue, ValueLengthLimit = int.MaxValue)]
         public async Task<IActionResult> AddOrUpdateProject(ProjectsViewModel model)
         {
             var result = await portfolioServices.AddorUpdateProjectAsync(model);
