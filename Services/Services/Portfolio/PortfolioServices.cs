@@ -624,7 +624,12 @@ namespace Services.Services.Portfolio
                             entry.ExtractToFile(Path.Combine(projectdirectorypath, entry.Name), true);
                         }
 
-                        ProjectPath = projectdirectorypath + entry;
+                        int extensionPos = entry.Name.LastIndexOf(".") + 1;
+                        var extension = entry.Name.Substring(extensionPos, entry.Name.Length - extensionPos);
+                        if (extension.ToLower() == "html")
+                        {
+                            ProjectPath = projectdirectorypath+ "/" + entry.Name;
+                        }
                     }
                 }
                 
